@@ -10,12 +10,18 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.FireworkEffect.Type;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Chicken;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -27,7 +33,11 @@ public final class Main extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
+
         Bukkit.getPluginManager().registerEvents(this, this);
+        getCommand("setLevel").setExecutor(new SetLevelCommand(this));
+        getCommand("allSetLevel").setExecutor(new AllSetLevelCommand());
     }
 
     /**
@@ -65,9 +75,6 @@ public final class Main extends JavaPlugin implements Listener {
                 // 追加した情報で再設定する。
                 firework.setFireworkMeta(fireworkMeta);
             }
-            Path path = Path.of("firework.txt");
-            Files.writeString(path, "簡単やった♪");
-            player.sendMessage(Files.readString(path));
         }
         count++;
     }
@@ -91,6 +98,21 @@ public final class Main extends JavaPlugin implements Listener {
             .forEach(item -> item.setAmount(64));
 
         player.getInventory().setContents(itemStacks);
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent e) throws IOException {
+        Player player = e.getPlayer();
+        World world = player.getWorld();
+        Location playerLocation = player.getLocation();
+
+        Chicken chicken = world.spawn(new Location(world, playerLocation.getX() + 3, playerLocation.getY(), playerLocation.getZ()), Chicken.class);
+        world.getBlockAt(new Location(world, playerLocation.getX() + 2, playerLocation.getY(), playerLocation.getZ())).setType(Material.DIAMOND_ORE);
+
+        Path path = Path.of("hello world");
+        Files.writeString(path, "あなたは選ばれた勇者です！この世界を救ってください.エンダードラゴンからこの世界を・・・");
+        player.sendMessage(Files.readString(path));
+
     }
 }
 
